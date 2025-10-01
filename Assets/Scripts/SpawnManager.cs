@@ -2,48 +2,53 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpawnManager : MonoBehaviour
+public class SpawnManager : GameManager
 {
-    private float zpos = 35f;
-    private float xpos = 15f;
+    private float zpos = 75f;
+    private float xpos = 25f;
     private float spawn_x;
     private float spawn_z;
 
     private int swimmer_c;
-    private int wave_c;
+
+    // private int wave_c;
+
     public GameObject swimmer_prefab;
-    public GameObject rock_prefab;
+    public GameObject[] rock_prefab;
     public GameObject wave_prefab;
     public GameObject damsel_prefab;
     private GameObject player;
 
     // Start is called before the first frame update
-    void Start()
+    public void StartGame(int difficulty)
     {
         player = GameObject.Find("Player");
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 6 * difficulty; i++)
         {
-            SpawnSwimmer();
             SpawnRock();
-            SpawnWave();
         }
         SpawnDamsel();
+
+        StartCoroutine(SpawnSwimmer());
+        titleScreen.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
-    void Update()
+    IEnumerator SpawnSwimmer()
     {
-        swimmer_c = FindObjectsOfType<ObstacleSwimmer>().Length;
-        wave_c = FindObjectsOfType<ObstacleWave>().Length;
-
-        if (swimmer_c < 3)
+        while (isGameActive)
         {
-            SpawnSwimmer();
-        }
-        if (wave_c < 3)
-        {
-            SpawnWave();
+            yield return new WaitForSeconds(1);
+            swimmer_c = FindObjectsByType<ObstacleSwimmer>(FindObjectsSortMode.None).Length;
+            if (swimmer_c < 5)
+            {
+                Instantiate(
+                    swimmer_prefab,
+                    GenerateSpawnPosition(true),
+                    swimmer_prefab.transform.rotation
+                );
+            }
         }
     }
 
@@ -54,30 +59,22 @@ public class SpawnManager : MonoBehaviour
         Instantiate(damsel_prefab, random_pos, transform.rotation);
     }
 
-    void SpawnSwimmer()
-    {
-        Instantiate(
-            swimmer_prefab,
-            GenerateSpawnPosition(true, 0.1f),
-            swimmer_prefab.transform.rotation
-        );
-    }
-
     void SpawnRock()
     {
-        Instantiate(rock_prefab, GenerateSpawnPosition(false, 1f), rock_prefab.transform.rotation);
+        int idxr = Random.Range(0, 4);
+        Instantiate(
+            rock_prefab[idxr],
+            GenerateSpawnPosition(false),
+            rock_prefab[idxr].transform.rotation
+        );
     }
 
     void SpawnWave()
     {
-        Instantiate(
-            wave_prefab,
-            GenerateSpawnPosition(false, 0.3f),
-            wave_prefab.transform.rotation
-        );
+        Instantiate(wave_prefab, GenerateSpawnPosition(false), wave_prefab.transform.rotation);
     }
 
-    private Vector3 GenerateSpawnPosition(bool bound, float ypos)
+    private Vector3 GenerateSpawnPosition(bool bound)
     {
         if (bound)
         {
@@ -92,7 +89,7 @@ public class SpawnManager : MonoBehaviour
 
         spawn_z = Random.Range(player.transform.position.z, zpos);
 
-        Vector3 random_pos = new Vector3(spawn_x, ypos, spawn_z);
+        Vector3 random_pos = new Vector3(spawn_x, 0f, spawn_z);
 
         return random_pos;
     }

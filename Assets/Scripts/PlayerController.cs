@@ -1,18 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     private float speed = 10f;
     private float turn_speed = 60f;
-    private float side_bound = 13f;
-    private float top_bound = 48f;
+    private float side_bound = 18f;
+    private float top_bound = 60f;
+    public bool isActive = true;
+    public TextMeshProUGUI gameEnded;
 
     void Update()
     {
-        MovePlayer();
-        ConstrainPlayer();
+        if (isActive)
+        {
+            MovePlayer();
+            ConstrainPlayer();
+        }
+        else
+        {
+            gameEnded.gameObject.SetActive(true);
+        }
     }
 
     // move player accross the screen
@@ -53,19 +63,17 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Obstacle"))
+        if (collision.gameObject.CompareTag("GameOver"))
         {
-            print("oh no you hit something");
-        }
-        else if (collision.gameObject.CompareTag("GameOver"))
-        {
-            print("oh no, you injured someone");
+            isActive = false;
+            gameEnded.text = "Oh No, you hit another swimmer";
         }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        print("yeah you reached the damsel in distress");
+        isActive = false;
+        gameEnded.text = "yeah you reached the damsel in distress";
     }
 }
 

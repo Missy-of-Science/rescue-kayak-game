@@ -5,7 +5,7 @@ using UnityEngine;
 public class ObstacleSwimmer : MonoBehaviour
 {
     public float speed;
-    private float edge = 15f;
+    private float edge = 30f;
 
     // Start is called before the first frame update
     void Start()
